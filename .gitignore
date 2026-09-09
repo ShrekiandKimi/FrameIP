@@ -1,0 +1,17 @@
+# Виртуальное окружение
+venv/
+.venv/
+env/
+
+# Байткод и кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.idea/
+.vscode/
+
+# Прочее
+.env
+*.log
