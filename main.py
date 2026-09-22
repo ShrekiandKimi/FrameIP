@@ -91,9 +91,10 @@ def main() -> None:
 0. Выход
 """
 
+    print(menu)
+
     while True:
-        print(menu)
-        choice = input("Выберите действие: ")
+        choice = input("\nВыберите действие: ")
 
         if choice == "1":
             show_dishes(dishes)
