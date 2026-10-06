@@ -2,66 +2,56 @@
 
 import sys
 
-from dishes import (
+from models import Dish, Order
+from models.clients import get_or_create_client, show_clients
+from models.dishes import (
     add_dish,
     filter_dishes_by_price,
     find_dish,
-    sort_dishes,
+    show_dishes,
 )
-from orders import (
+from models.orders import (
     cancel_order,
     create_order,
     get_order_status,
     get_total_revenue,
     get_unique_clients,
+    show_orders,
 )
-from storage import load_dishes, load_orders, save_dishes, save_orders
+from storage import (
+    load_clients,
+    load_dishes,
+    load_orders,
+    save_clients,
+    save_dishes,
+    save_orders,
+)
 from utils import input_float, input_int
 
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stdin.reconfigure(encoding="utf-8")
 
 DISHES_FILE = "data/dishes.json"
+CLIENTS_FILE = "data/clients.json"
 ORDERS_FILE = "data/orders.json"
 
 
-def show_dishes(dishes: dict[int, dict]) -> None:
-    """Вывести список блюд меню."""
-    if not dishes:
-        print("Меню пусто.")
-        return
-    for dish_id, dish in sort_dishes(dishes):
-        print(f"{dish_id}. {dish['name']} — {dish['price']} руб.")
-
-
-def show_orders(orders: list[dict]) -> None:
-    """Вывести список заказов."""
-    if not orders:
-        print("Заказов пока нет.")
-        return
-    for order in orders:
-        print(
-            f"Заказ №{order['id']} ({order['client_name']}): "
-            f"{order['total']} руб., курьер: {order['courier']}, "
-            f"статус: {order['status']}"
-        )
-
-
-def show_statistics(orders: list[dict]) -> None:
+def show_statistics(orders: list[Order]) -> None:
     """Вывести краткую статистику по заказам."""
     print(f"Всего заказов: {len(orders)}")
     print(f"Уникальных клиентов: {len(get_unique_clients(orders))}")
     print(f"Суммарная выручка: {get_total_revenue(orders)} руб.")
 
 
-def order_dishes_menu(dishes: dict[int, dict]) -> dict[int, int]:
+def order_dishes_menu(dishes: list[Dish]) -> dict[int, int]:
     """Опросить пользователя о составе заказа и вернуть словарь items."""
+    dish_ids = {dish.id for dish in dishes}
     items: dict[int, int] = {}
     while True:
         dish_id = input_int("ID блюда (0 — закончить выбор): ")
         if dish_id == 0:
             break
-        if dish_id not in dishes:
+        if dish_id not in dish_ids:
             print("Блюдо с таким ID не найдено.")
             continue
         quantity = input_int("Количество: ")
@@ -72,7 +62,8 @@ def order_dishes_menu(dishes: dict[int, dict]) -> dict[int, int]:
 def main() -> None:
     """Точка запуска приложения: меню и вызов функций проекта."""
     dishes = load_dishes(DISHES_FILE)
-    orders = load_orders(ORDERS_FILE)
+    clients = load_clients(CLIENTS_FILE)
+    orders = load_orders(ORDERS_FILE, clients)
 
     if not dishes:
         add_dish(dishes, "Пицца Маргарита", 590.0)
@@ -88,6 +79,7 @@ def main() -> None:
 5. Отменить заказ
 6. Показать заказы
 7. Показать статистику
+8. Показать клиентов
 0. Выход
 """
 
@@ -106,17 +98,18 @@ def main() -> None:
             show_dishes(filter_dishes_by_price(dishes, max_price))
         elif choice == "4":
             client_name = input("Имя клиента: ")
+            client = get_or_create_client(clients, client_name)
             items = order_dishes_menu(dishes)
             if not items:
                 print("Заказ не может быть пустым.")
                 continue
             try:
-                order = create_order(orders, dishes, client_name, items)
+                order = create_order(orders, dishes, client, items)
             except KeyError as error:
                 print(f"Ошибка при оформлении заказа: {error}")
                 continue
-            print(f"Заказ №{order['id']} оформлен.")
-            print(get_order_status(order["courier"]))
+            print(f"Заказ №{order.id} оформлен.")
+            print(get_order_status(order.courier))
         elif choice == "5":
             order_id = input_int("ID заказа для отмены: ")
             if cancel_order(orders, order_id):
@@ -127,8 +120,11 @@ def main() -> None:
             show_orders(orders)
         elif choice == "7":
             show_statistics(orders)
+        elif choice == "8":
+            show_clients(clients)
         elif choice == "0":
             save_dishes(DISHES_FILE, dishes)
+            save_clients(CLIENTS_FILE, clients)
             save_orders(ORDERS_FILE, orders)
             print("Данные сохранены. До свидания!")
             break

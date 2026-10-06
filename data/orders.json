@@ -1,22 +1,12 @@
 [
   {
     "id": 1,
-    "client_name": "Иван Петров",
+    "client_id": 1,
     "items": {
       "1": 2
     },
     "total": 1062.0,
-    "courier": "Алексей Сидоров",
-    "status": "в обработке"
-  },
-  {
-    "id": 2,
-    "client_name": "фы",
-    "items": {
-      "1": 2
-    },
-    "total": 1062.0,
-    "courier": "Мария Кузнецова",
+    "courier_id": 1,
     "status": "в обработке"
   }
 ]
