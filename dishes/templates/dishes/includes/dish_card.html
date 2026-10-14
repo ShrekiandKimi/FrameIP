@@ -1,0 +1,16 @@
+<article class="card dish-card mb-3">
+    <div class="card-body">
+        <h2 class="card-title h4">
+            {{ dish.name|default:"Без названия" }}
+        </h2>
+        <p class="card-text">
+            Цена: {{ dish.price|floatformat:"-2" }} руб.
+        </p>
+        <a
+            href="{% url 'dishes:detail' dish.id %}"
+            class="btn btn-primary"
+        >
+            Подробнее
+        </a>
+    </div>
+</article>

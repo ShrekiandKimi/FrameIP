@@ -4,7 +4,7 @@
 
 Приложение для оформления и отслеживания заказов доставки готовой еды из кафе и ресторанов: клиент выбирает блюда, оформляет заказ, а сервис рассчитывает стоимость, применяет скидку и назначает свободного курьера для доставки.
 
-Консольная версия приложения (ПР3) дополнена веб-интерфейсом на Django (ПР5). В браузере можно:
+Консольная версия приложения (ПР3) дополнена веб-интерфейсом на Django (ПР5), страницы которого формируются с помощью шаблонов Django (ПР6). В браузере можно:
 
 - просматривать меню (список блюд);
 - просматривать информацию о конкретном блюде и стоимость заказа одной порции с доставкой;
@@ -17,8 +17,12 @@
 
 - Python 3;
 - Django 5.2 — веб-фреймворк;
-- HTML — разметка веб-страниц;
-- CSS и Bootstrap 5.3 — оформление страниц;
+- Django Template Language (DTL) — шаблоны веб-страниц;
+- HTML5 — разметка веб-страниц;
+- CSS3 и Bootstrap 5.3 — оформление страниц;
+- JavaScript — небольшое клиентское поведение;
+- JSON — хранение данных;
+- Git;
 - pytest — автоматизированные тесты;
 - flake8 — проверка качества кода.
 
@@ -111,9 +115,19 @@ Client --оформляет--> Order --ссылается на--> Dish (чере
 
 Если блюдо, заказ или адрес не найдены, возвращается страница с кодом статуса 404 (для несуществующих адресов — собственная страница через `handler404`, она отображается при `DEBUG = False`).
 
+Все страницы формируются Django-шаблонами: view-функции только загружают данные средствами ПР3, готовят контекст и вызывают `render()`. HTML в Python-коде веб-представлений не формируется, функция `page()` из ПР5 удалена.
+
+| URL | Имя маршрута | Шаблон |
+|-----|--------------|--------|
+| `/` | `homepage:index` | `homepage/index.html` |
+| `/dishes/` | `dishes:list` | `dishes/dish_list.html` |
+| `/dishes/<id>/` | `dishes:detail` | `dishes/dish_detail.html` |
+| `/orders/` | `orders:list` | `orders/order_list.html` |
+| `/orders/<id>/` | `orders:detail` | `orders/order_detail.html` |
+
 ## Основные функции
 
-### Используется в веб-интерфейсе (ПР5)
+### Используется в веб-интерфейсе (ПР5, ПР6)
 - `load_dishes`, `load_clients`, `load_orders` — загрузка данных из JSON в объекты;
 - `find_dish_by_id`, `find_order_by_id` — поиск объекта по идентификатору для страниц деталей;
 - `calculate_order_total`, `apply_discount`, `get_delivery_cost` — стоимость заказа одной порции с доставкой на странице блюда;
@@ -154,19 +168,40 @@ FrameIP/
 │   ├── urls.py
 │   ├── asgi.py
 │   └── wsgi.py
+├── templates/
+│   ├── includes/
+│   │   └── navigation.html
+│   └── base.html
 ├── homepage/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
+│   ├── static/homepage/
+│   │   ├── css/style.css
+│   │   ├── img/logo.png
+│   │   └── js/main.js
+│   ├── templates/homepage/
+│   │   ├── 404.html
+│   │   └── index.html
 │   ├── migrations/
-│   ├── models.py
-│   ├── tests.py
+│   ├── __init__.py, admin.py, apps.py, models.py, tests.py
 │   ├── urls.py
 │   └── views.py
 ├── dishes/
-│   └── (та же структура: urls.py, views.py, ...)
+│   ├── templates/dishes/
+│   │   ├── includes/dish_card.html
+│   │   ├── dish_detail.html
+│   │   └── dish_list.html
+│   ├── migrations/
+│   ├── __init__.py, admin.py, apps.py, models.py, tests.py
+│   ├── urls.py
+│   └── views.py
 ├── orders/
-│   └── (та же структура: urls.py, views.py, ...)
+│   ├── templates/orders/
+│   │   ├── includes/order_status.html
+│   │   ├── order_detail.html
+│   │   └── order_list.html
+│   ├── migrations/
+│   ├── __init__.py, admin.py, apps.py, models.py, tests.py
+│   ├── urls.py
+│   └── views.py
 ├── models/
 │   ├── __init__.py
 │   ├── dishes.py
@@ -190,33 +225,80 @@ FrameIP/
 
 ### `frameip/`
 Пакет настроек Django-проекта:
-- `settings.py` — настройки проекта (в том числе `DATA_DIR` — каталог JSON-файлов);
+- `settings.py` — настройки проекта (`DATA_DIR` — каталог JSON-файлов, `DIRS` шаблонов — каталог `templates/`);
 - `urls.py` — маршрутизация верхнего уровня и обработчик `handler404`;
 - `asgi.py`, `wsgi.py` — точки взаимодействия с сервером.
 
+### `templates/`
+Шаблоны уровня проекта, общие для всех страниц:
+- `base.html` — базовый шаблон (HTML-структура, Bootstrap, собственные CSS и JS, шапка с логотипом, подвал, блоки `title` и `content`);
+- `includes/navigation.html` — навигация (подключается через `include`, ссылки формируются через `{% url %}`).
+
 ### `homepage/`
 Django-приложение главной страницы:
-- `views.py` — функция `page()` (общий HTML-каркас с Bootstrap и навигацией), view-функции `index()` и `page_not_found()`;
-- `urls.py` — маршрут главной страницы.
-
-Функция `page()` размещена здесь, потому что главная страница задаёт общий вид всех остальных страниц. Остальные приложения импортируют её.
+- `views.py` — view-функции `index()` и `page_not_found()` (обработчик 404);
+- `urls.py` — маршрут главной страницы (`app_name = "homepage"`);
+- `templates/homepage/` — шаблоны `index.html` и `404.html`;
+- `static/homepage/` — статические файлы сайта: `css/style.css`, `js/main.js`, `img/logo.png`.
 
 ### `dishes/`
 Django-приложение меню:
 - `views.py` — view-функции `dishes()` и `dish_detail()`;
-- `urls.py` — маршруты приложения.
+- `urls.py` — маршруты (`app_name = "dishes"`, имена `list` и `detail`);
+- `templates/dishes/` — `dish_list.html`, `dish_detail.html` и включаемый `includes/dish_card.html`.
 
 ### `orders/`
 Django-приложение заказов:
 - `views.py` — view-функции `orders()` и `order_detail()`;
-- `urls.py` — маршруты приложения.
+- `urls.py` — маршруты (`app_name = "orders"`, имена `list` и `detail`);
+- `templates/orders/` — `order_list.html`, `order_detail.html` и включаемый `includes/order_status.html`.
 
 Файлы `models.py` Django-приложений пока пусты: Django-модели появятся на следующих работах. Классы предметной области остаются в пакете `models/`.
 
 ### `models/`, `storage.py`, `utils.py`, `tests/`
 Классы предметной области, JSON-хранилище, вспомогательные функции консольного ввода и автоматизированные тесты (пакет ПР3). Веб-слой использует эти классы и функции, а не заменяет их.
 
+## Django Template Language
+
+### Базовый шаблон и наследование
+Общий шаблон страниц — `templates/base.html`: общая HTML-структура, подключение стилей и JavaScript, шапка с логотипом, навигация, подвал и блоки для содержимого. Дочерние шаблоны наследуют его через `{% extends "base.html" %}` и переопределяют блоки `{% block title %}` и `{% block content %}`.
+
+### Включаемые шаблоны
+Повторяющиеся фрагменты подключаются через `{% include %}`:
+
+- `includes/navigation.html` — навигация сайта;
+- `dishes/includes/dish_card.html` — карточка блюда в списке меню;
+- `orders/includes/order_status.html` — цветной статус заказа (в списке и на странице заказа).
+
+### Контекст
+View передаёт данные в шаблон словарём контекста:
+
+```python
+context = {"dishes": dishes_list}
+return render(request, "dishes/dish_list.html", context)
+```
+
+### Циклы и условия
+- `{% for %}` с `{% empty %}` — списки блюд и заказов, позиции заказа;
+- `{% if %}` / `{% elif %}` / `{% else %}` — состояния заказа (в обработке, ожидает курьера, отменён), наличие свободного курьера, бесплатная доставка, «объект не найден».
+
+Бизнес-логика (расчёт стоимости, скидка, назначение курьера) остаётся в Python-коде ПР3; шаблоны только отображают результат.
+
+### Фильтры шаблонов
+- `{{ dishes|length }}`, `{{ orders|length }}` — количество элементов;
+- `{{ dish.name|default:"Без названия" }}`, `{{ order.courier.name|default:"не назначен" }}` — значение по умолчанию;
+- `{{ dish.price|floatformat:"-2" }}` — форматирование цены;
+- `{{ order.status|capfirst }}` — первая буква заглавная.
+
+### Именованные URL и пространства имён
+У каждого приложения задан `app_name`, маршруты имеют имена: `homepage:index`, `dishes:list`, `dishes:detail`, `orders:list`, `orders:detail`. Ссылки формируются через `{% url %}`, а не жёстко заданными адресами.
+
+### Статические файлы
+Находятся в `homepage/static/homepage/`: `css/style.css` (собственные стили), `js/main.js` (текущий год в подвале), `img/logo.png` (логотип). В шаблонах используются `{% load static %}` и `{% static '...' %}`. Bootstrap 5.3 подключён через CDN и дополняется собственным CSS. Проверка: `python manage.py findstatic homepage/img/logo.png`.
+
 ## Формат хранения данных
+
+Данные пока хранятся в JSON-файлах (Django ORM и база данных не используются).
 
 Блюда (`data/dishes.json`) хранятся списком словарей с полями `id`, `name`, `price` — при загрузке каждый элемент преобразуется в объект `Dish`.
 
@@ -281,11 +363,21 @@ flake8
 - маршрутизация URL двух уровней, динамические маршруты с конвертером `<int:...>`;
 - view-функции и страницы, собственная страница ошибки 404;
 - отображение данных предметной области (блюда и заказы) из JSON-хранилища ПР3;
-- навигация между страницами, оформление Bootstrap 5.3.
+- навигация между страницами.
+
+Реализовано (ПР6):
+
+- перевод веб-интерфейса на шаблоны Django: `base.html`, `extends`, `block`, `include`;
+- передача данных через контекст, циклы `for`/`empty` и условия `if`;
+- именованные URL и пространства имён, ссылки через `{% url %}`;
+- фильтры шаблонов (`length`, `default`, `floatformat`, `capfirst`);
+- статические файлы: собственные CSS и JavaScript, логотип; Bootstrap 5.3;
+- отказ от формирования HTML в Python (функция `page()` удалена).
+
+Данные по-прежнему хранятся в JSON, Django ORM и формы Django пока не реализованы.
 
 На следующих этапах планируется:
 
-- шаблоны Django (`templates/`) вместо функции `page()`;
 - перенос сущностей `Dish`, `Client`, `Order` в Django ORM и подключение базы данных;
 - формы создания заказов и использование отложенной логики ПР3;
 - реализация регистрации и авторизации пользователей;

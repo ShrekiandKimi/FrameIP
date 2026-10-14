@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if order %}
+        Заказ №{{ order.id }} – Доставка готовой еды
+    {% else %}
+        Заказ не найден – Доставка готовой еды
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if order %}
+        <div class="card order-card">
+            <div class="card-body">
+                <h1 class="card-title">
+                    Заказ №{{ order.id }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>Клиент:</strong>
+                    {{ order.client.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Курьер:</strong>
+                    {{ order.courier.name|default:"не назначен" }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Состав заказа:</strong>
+                </p>
+                <ul>
+                    {% for position in positions %}
+                        <li>{{ position.name }} × {{ position.quantity }}</li>
+                    {% empty %}
+                        <li>Состав заказа пуст.</li>
+                    {% endfor %}
+                </ul>
+
+                <p class="card-text">
+                    <strong>Итого к оплате:</strong>
+                    {{ order.total|floatformat:"-2" }} руб.
+                </p>
+
+                <p class="card-text">
+                    <strong>Статус:</strong>
+                    {% include "orders/includes/order_status.html" %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">
+            Заказ не найден
+        </h1>
+        <p>
+            Заказ с указанным идентификатором отсутствует.
+        </p>
+    {% endif %}
+
+    <a
+        href="{% url 'orders:list' %}"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← к списку заказов
+    </a>
+{% endblock %}

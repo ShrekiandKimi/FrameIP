@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Заказы – Доставка готовой еды
+{% endblock %}
+
+{% block content %}
+    <h1>Заказы</h1>
+
+    <p>
+        Всего заказов: {{ orders|length }}
+    </p>
+
+    <p>
+        Свободный курьер для нового заказа:
+        {% if free_courier %}
+            <span class="badge bg-success">{{ free_courier.name }}</span>
+        {% else %}
+            <span class="badge bg-danger">нет свободных курьеров</span>
+        {% endif %}
+    </p>
+
+    <ul class="list-group">
+        {% for order in orders %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'orders:detail' order.id %}">
+                    Заказ №{{ order.id }} – {{ order.client.name }}
+                </a>
+                {% include "orders/includes/order_status.html" %}
+            </li>
+        {% empty %}
+            <li class="list-group-item">
+                Заказы не найдены.
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

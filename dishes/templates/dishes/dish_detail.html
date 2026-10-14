@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if dish %}
+        {{ dish.name }} – Доставка готовой еды
+    {% else %}
+        Блюдо не найдено – Доставка готовой еды
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if dish %}
+        <div class="card dish-card">
+            <div class="card-body">
+                <h1 class="card-title">
+                    {{ dish.name }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>ID:</strong> {{ dish.id }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Цена:</strong>
+                    {{ dish.price|floatformat:"-2" }} руб.
+                </p>
+
+                <p class="card-text">
+                    <strong>Заказ одной порции с доставкой:</strong>
+                    <span class="badge bg-primary">
+                        {{ portion_total|floatformat:"-2" }} руб.
+                    </span>
+                    {% if delivery_cost %}
+                        (доставка {{ delivery_cost }} руб.)
+                    {% else %}
+                        (доставка бесплатно)
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">
+            Блюдо не найдено
+        </h1>
+        <p>
+            Блюдо с указанным идентификатором отсутствует.
+        </p>
+    {% endif %}
+
+    <a
+        href="{% url 'dishes:list' %}"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← к меню
+    </a>
+{% endblock %}

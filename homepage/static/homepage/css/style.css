@@ -1,0 +1,65 @@
+:root {
+    --brand-color: #e8590c;
+    --brand-color-dark: #c24a0a;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #fffaf5;
+}
+
+main {
+    flex: 1;
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid var(--brand-color);
+    margin-bottom: 1.5rem;
+}
+
+.site-logo {
+    width: 72px;
+    height: auto;
+}
+
+.site-nav .nav-link {
+    color: var(--brand-color-dark);
+    font-weight: 600;
+}
+
+.site-nav .nav-link:hover {
+    color: var(--brand-color);
+    text-decoration: underline;
+}
+
+.dish-card {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #f1d4c0;
+    border-radius: 8px;
+}
+
+.dish-card .card-title {
+    color: var(--brand-color-dark);
+}
+
+.order-card {
+    border: 1px solid #f1d4c0;
+    border-radius: 8px;
+}
+
+.order-status {
+    font-weight: 600;
+}
+
+.site-footer {
+    color: #6c757d;
+    border-top: 1px solid #f1d4c0;
+    padding-top: 0.75rem;
+}

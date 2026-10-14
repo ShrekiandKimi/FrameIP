@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Главная – Доставка готовой еды
+{% endblock %}
+
+{% block content %}
+    <h1 class="display-4">Доставка готовой еды</h1>
+
+    <p class="lead">
+        Сервис заказа и доставки готовой еды.
+    </p>
+    <p>
+        Клиент выбирает блюда из меню и оформляет заказ, а сервис
+        рассчитывает стоимость, применяет скидку и назначает свободного
+        курьера для доставки.
+    </p>
+    <p>Основные разделы:</p>
+    <a href="{% url 'dishes:list' %}" class="btn btn-primary me-2">
+        Меню
+    </a>
+    <a href="{% url 'orders:list' %}" class="btn btn-secondary">
+        Заказы
+    </a>
+{% endblock %}
