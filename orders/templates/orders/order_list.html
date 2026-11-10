@@ -8,7 +8,7 @@
     <h1>Заказы</h1>
 
     <p>
-        Всего заказов: {{ orders|length }}
+        Всего заказов: {{ orders|length }} 
     </p>
 
     <p>
@@ -24,7 +24,7 @@
         {% for order in orders %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <a href="{% url 'orders:detail' order.id %}">
-                    Заказ №{{ order.id }} – {{ order.client.name }}
+                    Заказ №{{ order.id }} – {{ order.client_name }}
                 </a>
                 {% include "orders/includes/order_status.html" %}
             </li>

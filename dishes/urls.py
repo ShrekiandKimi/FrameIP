@@ -6,5 +6,6 @@ app_name = "dishes"
 
 urlpatterns = [
     path("", views.dishes, name="list"),
+    path("search/", views.search, name="search"),
     path("<int:dish_id>/", views.dish_detail, name="detail"),
 ]

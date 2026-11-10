@@ -11,6 +11,10 @@
         Всего блюд: {{ dishes|length }}
     </p>
 
+    <a href="{% url 'dishes:search' %}" class="btn btn-outline-primary mb-3">
+        Найти блюдо по цене
+    </a>
+
     {% for dish in dishes %}
         {% include "dishes/includes/dish_card.html" %}
     {% empty %}

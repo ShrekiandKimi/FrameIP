@@ -18,12 +18,12 @@
 
                 <p class="card-text">
                     <strong>Клиент:</strong>
-                    {{ order.client.name }}
+                    {{ order.client_name }}
                 </p>
 
                 <p class="card-text">
                     <strong>Курьер:</strong>
-                    {{ order.courier.name|default:"не назначен" }}
+                    {{ order.courier_name|default:"не назначен" }}
                 </p>
 
                 <p class="card-text">
@@ -31,7 +31,7 @@
                 </p>
                 <ul>
                     {% for position in positions %}
-                        <li>{{ position.name }} × {{ position.quantity }}</li>
+                        <li>{{ position.name }} × {{ position.quantity }} ({{ position.line_total|floatformat:"-2" }} руб.)</li>
                     {% empty %}
                         <li>Состав заказа пуст.</li>
                     {% endfor %}

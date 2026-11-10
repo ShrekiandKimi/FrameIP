@@ -21,7 +21,8 @@
 - HTML5 — разметка веб-страниц;
 - CSS3 и Bootstrap 5.3 — оформление страниц;
 - JavaScript — небольшое клиентское поведение;
-- JSON — хранение данных;
+- SQLite и модуль sqlite3 — реляционная база данных, SQL-запросы;
+- JSON — исходные данные проекта (ПР1–ПР6);
 - Git;
 - pytest — автоматизированные тесты;
 - flake8 — проверка качества кода.
@@ -202,6 +203,13 @@ FrameIP/
 │   ├── __init__.py, admin.py, apps.py, models.py, tests.py
 │   ├── urls.py
 │   └── views.py
+├── db/
+│   ├── __init__.py
+│   ├── database.py
+│   └── import_json.py
+├── sql/
+│   ├── schema.sql
+│   └── queries.sql
 ├── models/
 │   ├── __init__.py
 │   ├── dishes.py
@@ -211,11 +219,13 @@ FrameIP/
 ├── data/
 │   ├── dishes.json
 │   ├── clients.json
-│   └── orders.json
+│   ├── orders.json
+│   └── frameip.sqlite
 └── tests/
     ├── test_dishes.py
     ├── test_clients.py
-    └── test_orders.py
+    ├── test_orders.py
+    └── test_db.py
 ```
 
 ## Назначение модулей
@@ -296,9 +306,53 @@ return render(request, "dishes/dish_list.html", context)
 ### Статические файлы
 Находятся в `homepage/static/homepage/`: `css/style.css` (собственные стили), `js/main.js` (текущий год в подвале), `img/logo.png` (логотип). В шаблонах используются `{% load static %}` и `{% static '...' %}`. Bootstrap 5.3 подключён через CDN и дополняется собственным CSS. Проверка: `python manage.py findstatic homepage/img/logo.png`.
 
+## База данных (ПР7)
+
+Данные проекта перенесены из JSON в реляционную базу SQLite `data/frameip.sqlite`. Веб-страницы получают данные SQL-запросами через модуль `sqlite3`; Django ORM пока не используется.
+
+### Структура базы данных
+
+| Таблица | Поля | Назначение |
+|---------|------|-----------|
+| `dishes` | `id` INTEGER PK, `name` TEXT, `price` REAL | блюда меню |
+| `clients` | `id` INTEGER PK, `name` TEXT | клиенты |
+| `couriers` | `id` INTEGER PK, `name` TEXT | курьеры |
+| `orders` | `id` INTEGER PK, `client_id` INTEGER FK, `courier_id` INTEGER FK (может быть NULL), `total` REAL, `status` TEXT | заказы |
+| `order_items` | `order_id` FK, `dish_id` FK, `quantity` INTEGER; PK (`order_id`, `dish_id`) | состав заказа |
+
+Связи: `orders.client_id` → `clients.id`, `orders.courier_id` → `couriers.id`, `order_items.order_id` → `orders.id`, `order_items.dish_id` → `dishes.id`. `courier_id` допускает NULL: заказ ждёт свободного курьера.
+
+### Файлы слоя базы данных
+
+- `sql/schema.sql` — команды `CREATE TABLE IF NOT EXISTS` (безопасны при повторном запуске);
+- `db/database.py` — подключение (`row_factory = sqlite3.Row`, `PRAGMA foreign_keys = ON`), функции `fetch_all()` и `fetch_one()` с параметрами `?`;
+- `db/import_json.py` — перенос данных из JSON (порядок: блюда, клиенты, курьеры, заказы, состав заказов), транзакция с `commit()` и `rollback()`;
+- `sql/queries.sql` — 15 проверенных запросов: списки (3), `WHERE` (3), `JOIN` и подзапрос (3), агрегаты `COUNT`/`SUM`/`AVG`/`MIN`/`MAX` (3), `GROUP BY` и `HAVING` (3).
+
+### Страницы, получающие данные из SQLite
+
+| URL | Что показывает | Приём SQL |
+|-----|----------------|-----------|
+| `/dishes/` | меню | `SELECT`, `ORDER BY` |
+| `/dishes/<id>/` | карточка блюда | `WHERE id = ?` |
+| `/dishes/search/?max_price=450` | блюда не дороже заданной цены | параметризованный `WHERE price <= ?` |
+| `/orders/` | заказы с клиентом и курьером, свободный курьер | `JOIN`, `LEFT JOIN`, подзапрос `NOT IN` |
+| `/orders/<id>/` | заказ и его состав | `JOIN`, `WHERE ... = ?` |
+| `/orders/statistics/` | выручка, порции по блюдам, заказы по клиентам | `COUNT`, `SUM`, `AVG`, `GROUP BY`, `HAVING` |
+
+Значения передаются в запросы только через параметры `?`, f-строки для подстановки значений не используются.
+
+### Создание и заполнение базы
+
+```bash
+python -m db.import_json
+```
+
+Команда создаёт таблицы из `sql/schema.sql` и переносит данные из `data/*.json` (повторный запуск заново заполняет таблицы). Проверка запросов: `sqlite3 data/frameip.sqlite`.
+
 ## Формат хранения данных
 
-Данные пока хранятся в JSON-файлах (Django ORM и база данных не используются).
+Исходные данные лежат в JSON-файлах (хранилище ПР1–ПР6 сохранено, консольная версия работает с ними); веб-страницы читают SQLite.
 
 Блюда (`data/dishes.json`) хранятся списком словарей с полями `id`, `name`, `price` — при загрузке каждый элемент преобразуется в объект `Dish`.
 
@@ -374,7 +428,15 @@ flake8
 - статические файлы: собственные CSS и JavaScript, логотип; Bootstrap 5.3;
 - отказ от формирования HTML в Python (функция `page()` удалена).
 
-Данные по-прежнему хранятся в JSON, Django ORM и формы Django пока не реализованы.
+Реализовано (ПР7):
+
+- база данных SQLite: таблицы, первичные и внешние ключи (`sql/schema.sql`);
+- перенос данных из JSON (`db/import_json.py`), подключение `db/database.py`;
+- 15 SQL-запросов (`sql/queries.sql`): `WHERE`, `JOIN`, агрегаты, `GROUP BY`, `HAVING`;
+- страницы меню, заказов, поиска блюд по цене и статистики получают данные из SQLite;
+- параметризованные запросы, доступ к полям по именам (`sqlite3.Row`).
+
+Django ORM и формы Django пока не реализованы: переход к моделям Django — на следующих работах.
 
 На следующих этапах планируется:
 

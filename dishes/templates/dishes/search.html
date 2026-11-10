@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Поиск блюд – Доставка готовой еды
+{% endblock %}
+
+{% block content %}
+    <h1>Поиск блюд по цене</h1>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-auto">
+            <label for="max_price" class="col-form-label">Цена не выше, руб.:</label>
+        </div>
+        <div class="col-auto">
+            <input
+                type="text"
+                id="max_price"
+                name="max_price"
+                value="{{ max_price }}"
+                class="form-control"
+            >
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </div>
+    </form>
+
+    {% if error %}
+        <p class="text-danger">{{ error }}</p>
+    {% endif %}
+
+    {% if searched %}
+        <h2 class="h5">Найдено блюд: {{ dishes|length }}</h2>
+        {% for dish in dishes %}
+            {% include "dishes/includes/dish_card.html" %}
+        {% empty %}
+            <p>Блюд с такой ценой нет.</p>
+        {% endfor %}
+    {% endif %}
+
+    <a href="{% url 'dishes:list' %}" class="btn btn-outline-secondary mt-3">
+        ← к меню
+    </a>
+{% endblock %}

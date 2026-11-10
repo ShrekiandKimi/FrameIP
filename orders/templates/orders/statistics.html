@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Статистика – Доставка готовой еды
+{% endblock %}
+
+{% block content %}
+    <h1>Статистика заказов</h1>
+
+    <p>
+        Активных заказов: <strong>{{ summary.active_orders }}</strong>,
+        выручка: <strong>{{ summary.revenue|floatformat:"-2" }} руб.</strong>,
+        средний чек: <strong>{{ summary.avg_total|floatformat:"-2" }} руб.</strong>
+    </p>
+
+    <h2 class="h4">Заказано порций по блюдам</h2>
+    <ul class="list-group mb-4">
+        {% for item in dishes_sold %}
+            <li class="list-group-item d-flex justify-content-between">
+                {{ item.dish_name }}
+                <span class="badge bg-primary">{{ item.sold }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Данные отсутствуют.</li>
+        {% endfor %}
+    </ul>
+
+    <h2 class="h4">Заказы по клиентам</h2>
+    <ul class="list-group mb-4">
+        {% for item in clients_stats %}
+            <li class="list-group-item d-flex justify-content-between">
+                {{ item.client_name }}
+                <span>
+                    заказов: {{ item.orders_count }},
+                    на сумму {{ item.total_sum|floatformat:"-2" }} руб.
+                </span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Данные отсутствуют.</li>
+        {% endfor %}
+    </ul>
+
+    <h2 class="h4">Постоянные клиенты (больше одного заказа)</h2>
+    <ul class="list-group">
+        {% for item in regular_clients %}
+            <li class="list-group-item">
+                {{ item.client_name }} – заказов: {{ item.orders_count }}
+            </li>
+        {% empty %}
+            <li class="list-group-item">Пока нет клиентов с несколькими заказами.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
