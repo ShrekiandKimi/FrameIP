@@ -1,0 +1,54 @@
+[33mcommit da64c73ed8f25c243263e41f149d49caad4198d6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: ShrekiandKimi <maxuldarn@gmail.com>
+Date:   Tue Nov 10 14:11:07 2026 +0300
+
+    2kr
+
+[33mcommit 8aafcc8bb38d1e8a55bbdfc508ce56288b1722f4[m
+Author: ShrekiandKimi <maxuldarn@gmail.com>
+Date:   Wed Oct 14 12:40:36 2026 +0300
+
+    6prac
+
+[33mcommit e8821dcfa3c773a8c9347125ca40a4127ebea69c[m
+Author: ShrekiandKimi <maxuldarn@gmail.com>
+Date:   Tue Oct 6 22:58:56 2026 +0300
+
+    5prac
+
+[33mcommit 21ee6f602a587fc7261c5b2a24a0f2a9010a2531[m
+Author: ShrekiandKimi <maxuldarn@gmail.com>
+Date:   Tue Sep 22 12:40:38 2026 +0300
+
+    2prac
+
+[33mcommit 25b2cb395518226bf9a3c47a8bac8a85395cb68f[m
+Author: ShrekiandKimi <maxuldarn@gmail.com>
+Date:   Wed Sep 16 11:54:36 2026 +0300
+
+    ПР2: коллекции, модули, файлы и тесты для сервиса доставки еды
+    
+    Проект разделён на модули (dishes.py, orders.py, storage.py, utils.py).
+    Данные о блюдах и заказах хранятся в JSON (data/), функции ПР1 сохранены
+    и развиты (calculate_order_total, apply_discount, get_delivery_cost,
+    get_order_status). Добавлены обработка исключений при вводе и работе
+    с файлами, аннотации типов основных функций, автоматизированные тесты
+    pytest (tests/) и конфигурация flake8. README.md обновлён под новую
+    структуру и функциональность.
+
+[33mcommit ac176c65ec739e1a5bea2df8c1dfccd82e99fd07[m
+Author: ShrekiandKimi <maxuldarn@gmail.com>
+Date:   Wed Sep 9 13:32:49 2026 +0300
+
+    ПР1: структура проекта, README.md и начальный сценарий FrameIP
+    
+    Тема: сервис доставки готовой еды. Добавлены .gitignore и main.py
+    с начальным сценарием оформления заказа (расчёт стоимости, скидка,
+    назначение курьера; условные конструкции, преобразование типов,
+    импорт модуля datetime). README.md заполнен по шаблону ПР1.
+
+[33mcommit 15a9b29ea48aa3808fbc31c6420dbdfd67ab8273[m
+Author: ShrekiandKimi <maxuldarn@gmail.com>
+Date:   Wed Sep 9 13:28:49 2026 +0300
+
+    first commit
